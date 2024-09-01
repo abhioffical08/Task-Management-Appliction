@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+    <!-- <link rel="stylesheet" href="styles.css"> -->
+</head>
+<body>
+    <style>
+        .container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+form {
+    margin-bottom: 20px;
+}
+
+#task-list {
+    margin-top: 20px;
+}
+
+.task {
+    border: 1px solid #ddd;
+    background-color: #fff;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.task-actions {
+    margin-top: 10px;
+}
+
+button {
+    cursor: pointer;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+label {
+    font-weight: bold;
+}
+
+textarea {
+    width: 100%;
+    height: 100px;
+    resize: vertical;
+}
+
+    </style>
+    <div class="container">
+        <h1>Task Management Application</h1>
+        <form id="task-form">
+            <label for="title">Title:</label>
+            <input type="text" id="title" required>
+            
+            <label for="description">Description:</label>
+            <textarea id="description" required></textarea>
+            
+            <label for="status">Status:</label>
+            <select id="status">
+                <option value="pending">Pending</option>
+                <option value="completed">Completed</option>
+            </select>
+            
+            <button type="submit">Add Task</button>
+        </form>
+        <div id="filter">
+            <label>Filter:</label>
+            <select id="filter-tasks">
+                <option value="all">All</option>
+                <option value="pending">Pending</option>
+                <option value="completed">Completed</option>
+            </select>
+        </div>
+        <div id="task-list"></div>
+    </div>
+    
+    <script>
+        class Task {
+    constructor(id, title, description, status) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.status = status;
+    }
+}
+
+// Initial tasks
+let tasks = [];
+
+// DOM Elements
+const taskForm = document.getElementById('task-form');
+const taskList = document.getElementById('task-list');
+const filterTasks = document.getElementById('filter-tasks');
+
+// Event Listeners
+taskForm.addEventListener('submit', addTask);
+filterTasks.addEventListener('change', filterTaskList);
+
+// Functions
+function addTask(event) {
+    event.preventDefault();
+
+    const title = document.getElementById('title').value.trim();
+    const description = document.getElementById('description').value.trim();
+    const status = document.getElementById('status').value;
+
+    if (!title || !description) {
+        alert('Please fill in all fields.');
+        return;
+    }
+
+    const newTask = new Task(tasks.length + 1, title, description, status);
+    tasks.push(newTask);
+
+    renderTasks();
+    taskForm.reset();
+}
+
+function deleteTask(taskId) {
+    tasks = tasks.filter(task => task.id !== taskId);
+    renderTasks();
+}
+
+function editTask(taskId, updatedTitle, updatedDescription, updatedStatus) {
+    tasks = tasks.map(task => {
+        if (task.id === taskId) {
+            return {
+                ...task,
+                title: updatedTitle,
+                description: updatedDescription,
+                status: updatedStatus
+            };
+        }
+        return task;
+    });
+
+    renderTasks();
+}
+
+function renderTasks() {
+    taskList.innerHTML = '';
+
+    tasks.forEach(task => {
+        const taskElement = document.createElement('div');
+        taskElement.classList.add('task');
+        taskElement.innerHTML = `
+            <h3>${task.title}</h3>
+            <p>${task.description}</p>
+            <p>Status: ${task.status}</p>
+            <div class="task-actions">
+                <button onclick="deleteTask(${task.id})">Delete</button>
+                <button onclick="editTask(${task.id}, 'Updated Title', 'Updated Description', 'completed')">Edit</button>
+            </div>
+        `;
+        taskList.appendChild(taskElement);
+    });
+}
+
+function filterTaskList() {
+    const filterValue = filterTasks.value;
+
+    if (filterValue === 'all') {
+        renderTasks();
+    } else {
+        const filteredTasks = tasks.filter(task => task.status === filterValue);
+        taskList.innerHTML = '';
+
+        filteredTasks.forEach(task => {
+            const taskElement = document.createElement('div');
+            taskElement.classList.add('task');
+            taskElement.innerHTML = `
+                <h3>${task.title}</h3>
+                <p>${task.description}</p>
+                <p>Status: ${task.status}</p>
+                <div class="task-actions">
+                    <button onclick="deleteTask(${task.id})">Delete</button>
+                    <button onclick="editTask(${task.id}, 'Updated Title', 'Updated Description', 'completed')">Edit</button>
+                </div>
+            `;
+            taskList.appendChild(taskElement);
+        });
+    }
+}
+renderTasks();
+
+    </script>
+</body>
+</html>
